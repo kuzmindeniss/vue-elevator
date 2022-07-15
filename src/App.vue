@@ -1,17 +1,19 @@
 <template>
   <div class="app-wrapper">
-    <ul class="floor-dividers">
-      <li v-for="n in levels" :key="n" :style="{top: n * (100 / levels) + '%'}" class="floor-dividers__item"></li>
-    </ul>
+    <FloorDividers :levels="levels"/>
     <div class="elevator-shafts__wrapper">
       <ul class="elevator-shafts">
-        <li v-for="n in elevatorsQuantity" :key="n" class="elevator-shafts__item"></li>
+        <li v-for="n in elevatorsQuantity" :key="n" class="elevator-shafts__item">
+          <div class="elevator" :style="{height: 100 / levels + '%'}"></div>
+        </li>
       </ul>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import FloorDividers from "@/components/FloorDividers.vue";
+
 const levels = 5;
 const elevatorsQuantity = 2;
 
@@ -50,23 +52,6 @@ ul, li {
   height: 100%;
 }
 
-.floor-dividers {
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-top: 2px solid #ececec;
-
-  &__item {
-    position: absolute;
-    height: 2px;
-    width: 100%;
-    background-color: #ececec;
-  }
-}
-
 .elevator-shafts {
   display: flex;
   padding-left: 10px;
@@ -77,9 +62,19 @@ ul, li {
   }
 
   &__item {
-    width: 100px;
+    position: relative;
+    width: 122px;
     margin-right: 10px;
-    background-color: #42b983;
+    border-left: 2px solid #c9c5c5;
+    border-right: 2px solid #c9c5c5;
   }
 }
+
+.elevator {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background-color: #b6f4ff;
+}
+
 </style>
