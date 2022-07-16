@@ -6,9 +6,7 @@
 </template>
 
 <script setup lang="ts">
-  defineProps<{
-    levels: number;
-  }>();
+import {levels} from "@/store";
 </script>
 
 <style scoped lang="scss">

@@ -1,24 +1,55 @@
+<script setup lang="ts">
+import FloorDividers from "@/components/FloorDividers.vue";
+import ElevatorShafts from "@/components/ElevatorShafts.vue";
+import ControlPanel from "@/components/ControlPanel.vue";
+import {elevators, levels, pressedLevels} from "@/store";
+
+const getIndexOfClosestElevator = (level: number): number => {
+  let closestIndexOfElevator = 0;
+  let closestAbs = levels.value;
+  elevators.forEach((elevator, i) => {
+    if (elevator.to) return;
+    const abs = Math.abs(elevator.current - level);
+    if (abs < closestAbs) {
+      closestIndexOfElevator = i;
+      closestAbs = abs;
+    }
+  })
+  return closestIndexOfElevator;
+}
+
+const areAllElevatorsBusy = (): boolean => {
+  for (let i = 0; i < elevators.length; i++) {
+    if (!elevators[i].to) return false;
+  }
+  return true;
+}
+
+const isLevelOccupied = (level: number): boolean => {
+  for (let i = 0; i < elevators.length; i++) {
+    if (elevators[i].from === level && !elevators[i].to) return true;
+  }
+  return false;
+}
+
+const controlClicked = (level: number) => {
+  if (pressedLevels[level] || areAllElevatorsBusy() || isLevelOccupied(level)) return;
+  pressedLevels[level] = true;
+  const elevatorIdx = getIndexOfClosestElevator(level);
+  elevators[elevatorIdx].to = level;
+}
+</script>
+
+
 <template>
   <div class="app-wrapper">
-    <FloorDividers :levels="levels"/>
+    <FloorDividers/>
     <div class="elevator-shafts__wrapper">
-      <ul class="elevator-shafts">
-        <li v-for="n in elevatorsQuantity" :key="n" class="elevator-shafts__item">
-          <div class="elevator" :style="{height: 100 / levels + '%'}"></div>
-        </li>
-      </ul>
+      <ElevatorShafts/>
+      <ControlPanel @control-clicked="controlClicked"/>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import FloorDividers from "@/components/FloorDividers.vue";
-
-const levels = 5;
-const elevatorsQuantity = 2;
-
-
-</script>
 
 <style lang="scss">
 body {
@@ -50,31 +81,6 @@ ul, li {
   position: relative;
   width: 100%;
   height: 100%;
-}
-
-.elevator-shafts {
-  display: flex;
-  padding-left: 10px;
-
-  &__wrapper {
-    display: flex;
-    height: 100%;
-  }
-
-  &__item {
-    position: relative;
-    width: 122px;
-    margin-right: 10px;
-    border-left: 2px solid #c9c5c5;
-    border-right: 2px solid #c9c5c5;
-  }
-}
-
-.elevator {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background-color: #b6f4ff;
 }
 
 </style>
