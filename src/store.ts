@@ -23,7 +23,8 @@ const initAllCookies = (): {
 }
 
 const cookies = initAllCookies();
-console.log(cookies);
+if ((cookies.elevatorsQuantity && cookies.elevatorsQuantity !== elevatorsInit.elevatorsQuantity) ||
+	(cookies.levels && cookies.levels !== elevatorsInit.levels)) resetAllCookies();
 
 export const elevatorsQuantity = ref(cookies.elevatorsQuantity ? cookies.elevatorsQuantity : elevatorsInit.elevatorsQuantity);
 export const levels = ref(cookies.levels ? cookies.levels : elevatorsInit.levels);
@@ -49,7 +50,7 @@ export const saveToCookies = () => {
 	Cookies.set('elevators', JSON.stringify(elevators));
 }
 
-export const resetAllCookies = () => {
+export function resetAllCookies(){
 	Cookies.remove('elevators-quantity');
 	Cookies.remove('levels');
 	Cookies.remove('pressed-levels');
