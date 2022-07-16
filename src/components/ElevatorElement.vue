@@ -6,16 +6,16 @@ import gsap from 'gsap';
 const props = defineProps<{
   index: number
 }>();
-
-const isMoving = ref<boolean>(false);
 const elevator = elevators[props.index];
 const elevatorRef = ref<HTMLDivElement | null>(null);
+
+const isMoving = ref<boolean>(false);
 
 const oneLevelToPercent = 100 / levels.value;
 
 const styleObject = reactive({
   height: oneLevelToPercent + '%',
-  bottom: 0
+  bottom: 0,
 })
 
 watch(elevator, (elevator) => {
@@ -27,7 +27,6 @@ watch(elevator, (elevator) => {
     moveTo(elevator.current, elevator.to);
   }
 })
-
 
 const moveTo = async (from: number, to: number) => {
   if (isMoving.value === true) return;
@@ -48,13 +47,45 @@ const moveTo = async (from: number, to: number) => {
   }
   isMoving.value = false;
   elevator.current = to;
+  pressedLevels[to] = false;
+  await stay();
   elevator.from = to;
   elevator.to = null;
   elevator.queue.shift();
   pressedLevels[to] = false;
 }
 
+
 const tl = gsap.timeline();
+
+const stay = () => {
+  const opacity = .5;
+
+  return new Promise<boolean>(resolve => {
+    tl.to(elevatorRef.value, {
+      duration: .5,
+      alpha: opacity,
+    }).to(elevatorRef.value, {
+      duration: .5,
+      alpha: 1,
+    }).to(elevatorRef.value, {
+      duration: .5,
+      alpha: opacity,
+    }).to(elevatorRef.value, {
+      duration: .5,
+      alpha: 1,
+    }).to(elevatorRef.value, {
+      duration: .5,
+      alpha: opacity,
+    }).to(elevatorRef.value, {
+      duration: .5,
+      alpha: 1,
+      onComplete: () => {
+        resolve(true);
+      }
+    })
+  })
+}
 
 const moveStep = (current: number, delta: number) => {
   return new Promise<number>(resolve => {
@@ -68,15 +99,13 @@ const moveStep = (current: number, delta: number) => {
     });
   });
 }
-
 </script>
 
 <template>
   <div ref="elevatorRef" class="elevator" :style="styleObject"></div>
 </template>
 
-<style scoped lang="scss">
-
+<style lang="scss">
 .elevator {
   position: absolute;
   bottom: 0;
