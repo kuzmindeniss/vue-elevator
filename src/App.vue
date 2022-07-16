@@ -18,25 +18,19 @@ const getIndexOfClosestElevator = (level: number): number => {
   return closestIndexOfElevator;
 }
 
-const areAllElevatorsBusy = (): boolean => {
-  for (let i = 0; i < elevators.length; i++) {
-    if (!elevators[i].to) return false;
-  }
-  return true;
-}
-
 const isLevelOccupied = (level: number): boolean => {
   for (let i = 0; i < elevators.length; i++) {
     if (elevators[i].from === level && !elevators[i].to) return true;
+    if (elevators[i].to === level) return true;
   }
   return false;
 }
 
 const controlClicked = (level: number) => {
-  if (pressedLevels[level] || areAllElevatorsBusy() || isLevelOccupied(level)) return;
+  if (pressedLevels[level] || isLevelOccupied(level)) return;
   pressedLevels[level] = true;
   const elevatorIdx = getIndexOfClosestElevator(level);
-  elevators[elevatorIdx].to = level;
+  elevators[elevatorIdx].queue.push(level);
 }
 </script>
 

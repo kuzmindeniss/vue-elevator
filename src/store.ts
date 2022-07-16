@@ -1,8 +1,8 @@
 import {reactive, ref} from 'vue';
 import {ElevatorI} from "@/types";
 
-export const elevatorsQuantity = ref(2);
-export const levels = ref(5);
+export const elevatorsQuantity = ref(4);
+export const levels = ref(7);
 
 export const pressedLevels = reactive<{[key: number]: boolean}>({});
 
