@@ -4,3 +4,7 @@ export interface ElevatorI {
 	to: null | number,
 	queue: number[]
 }
+
+export interface PressedLevelsI {
+	[key: number]: boolean
+}

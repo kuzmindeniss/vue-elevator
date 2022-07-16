@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {elevators, levels, pressedLevels} from '@/store';
-import {ref, watch} from "vue";
+import {elevators, levels, pressedLevels, saveToCookies} from '@/store';
+import {onMounted, ref, watch} from "vue";
 import gsap from 'gsap';
 
 const props = defineProps<{
@@ -8,27 +8,9 @@ const props = defineProps<{
 }>();
 const elevator = elevators[props.index];
 const elevatorRef = ref<HTMLDivElement | null>(null);
-
 const movingDirection = ref<'top' | 'bottom' | null>(null);
-
 const oneLevelToPercent = 100 / levels.value;
-
 const height = ref<number>(oneLevelToPercent);
-
-watch(elevator.queue, (queue) => {
-  if (!queue[0]) return;
-  elevator.to = queue[0];
-});
-
-watch(elevator, (elevator) => {
-  if (!elevator) return;
-  if (elevator.to && (elevator.to > elevator.current)) {
-    moveTo(elevator.current, elevator.to);
-  }
-  if (elevator.to && (elevator.to < elevator.current)) {
-    moveTo(elevator.current, elevator.to);
-  }
-})
 
 const moveTo = async (from: number, to: number) => {
   if (movingDirection.value) return;
@@ -48,14 +30,14 @@ const moveTo = async (from: number, to: number) => {
   }
   elevator.current = to;
   pressedLevels[to] = false;
-  await stay();
   movingDirection.value = null;
   elevator.from = to;
   elevator.to = null;
   elevator.queue.shift();
   pressedLevels[to] = false;
+  saveToCookies();
+  await stay();
 }
-
 
 const tl = gsap.timeline();
 
@@ -96,11 +78,43 @@ const moveStep = (current: number, delta: number) => {
       ease: 'none',
       onComplete: () => {
         elevator.current = elevator.current + delta;
-        resolve(delta)
+        resolve(delta);
+        saveToCookies();
       }
     });
   });
 }
+
+const initElevator = () => {
+  tl.to(elevatorRef.value, {
+    duration: 0,
+    bottom: oneLevelToPercent * (elevator.current - 1) + '%',
+    ease: 'none'
+  });
+};
+
+watch(elevator.queue, (queue) => {
+  if (!queue[0]) return;
+  elevator.to = queue[0];
+}, {
+  immediate: true
+});
+
+watch(elevator, (elevator) => {
+  if (!elevator) return;
+  if (elevator.to && (elevator.to > elevator.current)) {
+    moveTo(elevator.current, elevator.to);
+  }
+  if (elevator.to && (elevator.to < elevator.current)) {
+    moveTo(elevator.current, elevator.to);
+  }
+}, {
+  immediate: true
+})
+
+onMounted(() => {
+  initElevator();
+})
 </script>
 
 <template>
@@ -110,7 +124,7 @@ const moveStep = (current: number, delta: number) => {
         'elevator__arrow': true,
         'elevator__arrow--bottom': movingDirection === 'bottom'
       }"></div>
-      <div class="elevator__to-number">{{elevator.to}}</div>
+      <div class="elevator__to-number">{{ elevator.to }}</div>
     </div>
   </div>
 </template>
